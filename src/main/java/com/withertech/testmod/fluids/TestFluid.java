@@ -19,54 +19,47 @@
 package com.withertech.testmod.fluids;
 
 import com.withertech.testmod.TestMod;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import com.withertech.witherlib.WitherLib;
+import com.withertech.witherlib.registration.TypedRegKey;
 import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.fluid.FlowingFluid;
-import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.item.Item;
+import net.minecraft.item.BucketItem;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleTypes;
-import net.minecraft.state.StateContainer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.fluids.ForgeFlowingFluid;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Random;
 
-public abstract class TestFluid extends FlowingFluid
+public abstract class TestFluid extends ForgeFlowingFluid
 {
-    @Override
-    @Nonnull
-    public Fluid getFlowing()
-    {
-        return TestMod.INSTANCE.REGISTRY.getFluid("test_fluid_flowing").get();
-    }
+    private static final Properties properties = new Properties(
+            () -> TestMod.INSTANCE.REGISTRY.getFluid(TypedRegKey.fluid("test_fluid", Source.class)).get(),
+            () -> TestMod.INSTANCE.REGISTRY.getFluid(TypedRegKey.fluid("test_fluid_flowing", Flowing.class)).get(),
+            FluidAttributes.builder(
+                    TestMod.INSTANCE.MOD.modLocation("block/test_fluid_still"),
+                    TestMod.INSTANCE.MOD.modLocation("block/test_fluid_flow"))
+                    .translationKey("block.testmod.test_fluid"))
+            .bucket(() -> TestMod.INSTANCE.REGISTRY.getItem(TypedRegKey.item("test_fluid_bucket", BucketItem.class)).get())
+            .block(() -> TestMod.INSTANCE.REGISTRY.getBlock(TypedRegKey.block("test_fluid", FlowingFluidBlock.class)).get())
+            .canMultiply()
+            .slopeFindDistance(4)
+            .tickRate(5)
+            .levelDecreasePerBlock(1)
+            .explosionResistance(100F);
 
-    @Override
-    @Nonnull
-    public Fluid getSource()
-    {
-        return TestMod.INSTANCE.REGISTRY.getFluid("test_fluid").get();
-    }
 
-    @Override
-    @Nonnull
-    public Item getBucket()
+    protected TestFluid(Properties properties)
     {
-        return TestMod.INSTANCE.REGISTRY.getItem("test_fluid_bucket").get();
+        super(properties);
     }
 
     @Override
@@ -95,95 +88,20 @@ public abstract class TestFluid extends FlowingFluid
         return ParticleTypes.DRIPPING_WATER;
     }
 
-    @Override
-    protected boolean canConvertToSource()
-    {
-        return true;
-    }
 
-    @Override
-    protected void beforeDestroyingBlock(@Nonnull IWorld world, @Nonnull BlockPos pos, BlockState state)
+    public static class Flowing extends ForgeFlowingFluid.Flowing
     {
-        TileEntity tileentity = state.hasTileEntity() ? world.getBlockEntity(pos) : null;
-        Block.dropResources(state, world, pos, tileentity);
-    }
-
-    @Override
-    public int getSlopeFindDistance(@Nonnull IWorldReader world)
-    {
-        return 4;
-    }
-
-    @Override
-    @Nonnull
-    public BlockState createLegacyBlock(@Nonnull FluidState state)
-    {
-        return TestMod.INSTANCE.REGISTRY.getBlock("test_fluid").get().defaultBlockState().setValue(FlowingFluidBlock.LEVEL, getLegacyLevel(state));
-    }
-
-    public boolean isSame(@Nonnull Fluid fluid)
-    {
-        return fluid == TestMod.INSTANCE.REGISTRY.getFluid("test_fluid").get() || fluid == TestMod.INSTANCE.REGISTRY.getFluid("test_fluid_flowing").get();
-    }
-
-    public int getDropOff(@Nonnull IWorldReader world)
-    {
-        return 1;
-    }
-
-    public int getTickDelay(@Nonnull IWorldReader world)
-    {
-        return 5;
-    }
-
-    public boolean canBeReplacedWith(@Nonnull FluidState state, @Nonnull IBlockReader world, @Nonnull BlockPos pos, @Nonnull Fluid fluid, @Nonnull Direction direction)
-    {
-        return direction == Direction.DOWN && !fluid.is(TestMod.INSTANCE.REGISTRY.getFluidTag("test_fluid"));
-    }
-
-    protected float getExplosionResistance()
-    {
-        return 100.0F;
-    }
-
-    @Override
-    @Nonnull
-    protected FluidAttributes createAttributes()
-    {
-        return FluidAttributes.builder(TestMod.INSTANCE.MOD.modLocation("block/test_fluid_still"), TestMod.INSTANCE.MOD.modLocation("block/test_fluid_flow"))
-                .translationKey("block.testmod.test_fluid")
-                .build(this);
-    }
-
-    public static class Flowing extends TestFluid
-    {
-        protected void createFluidStateDefinition(@Nonnull StateContainer.Builder<Fluid, FluidState> stateBuilder)
+        public Flowing()
         {
-            super.createFluidStateDefinition(stateBuilder);
-            stateBuilder.add(LEVEL);
-        }
-
-        public int getAmount(FluidState state)
-        {
-            return state.getValue(LEVEL);
-        }
-
-        public boolean isSource(@Nonnull FluidState state)
-        {
-            return false;
+            super(properties);
         }
     }
 
-    public static class Source extends TestFluid
+    public static class Source extends ForgeFlowingFluid.Source
     {
-        public int getAmount(@Nonnull FluidState state)
+        public Source()
         {
-            return 8;
-        }
-
-        public boolean isSource(@Nonnull FluidState state)
-        {
-            return true;
+            super(properties);
         }
     }
 }

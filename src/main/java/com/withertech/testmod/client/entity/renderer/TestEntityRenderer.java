@@ -19,10 +19,10 @@
 package com.withertech.testmod.client.entity.renderer;
 
 
-
 import com.withertech.testmod.TestMod;
 import com.withertech.testmod.client.entity.model.TestEntityModel;
 import com.withertech.testmod.entities.TestEntity;
+import com.withertech.witherlib.WitherLib;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.util.ResourceLocation;

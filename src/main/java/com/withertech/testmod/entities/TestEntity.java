@@ -19,6 +19,9 @@
 package com.withertech.testmod.entities;
 
 import com.withertech.testmod.TestMod;
+import com.withertech.testmod.items.TestItem;
+import com.withertech.witherlib.WitherLib;
+import com.withertech.witherlib.registration.TypedRegKey;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
@@ -49,16 +52,11 @@ public class TestEntity extends AnimalEntity
         super(type, world);
     }
 
-    public static AttributeModifierMap.MutableAttribute createAttributes()
-    {
-        return MobEntity.createMobAttributes().add(Attributes.MAX_HEALTH, 8.0D).add(Attributes.MOVEMENT_SPEED, 0.23F);
-    }
-
     @Nullable
     @Override
     public AgeableEntity getBreedOffspring(@Nonnull ServerWorld world, @Nonnull AgeableEntity ageable)
     {
-        TestEntity entity = (TestEntity) TestMod.INSTANCE.REGISTRY.getEntity("test_entity").get().create(this.level);
+        TestEntity entity = TestMod.INSTANCE.REGISTRY.getEntity(TypedRegKey.entity("test_entity", TestEntity.class)).get().create(this.level);
         assert entity != null;
         entity.finalizeSpawn((IServerWorld) this.level, this.level.getCurrentDifficultyAt(entity.blockPosition()), SpawnReason.BREEDING, null, null);
         return entity;
@@ -72,7 +70,7 @@ public class TestEntity extends AnimalEntity
         this.goalSelector.addGoal(0, new SwimGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.25D));
         this.goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
-        this.goalSelector.addGoal(3, new TemptGoal(this, 1.1D, Ingredient.of(TestMod.INSTANCE.REGISTRY.getItem("test_item").get()), false));
+        this.goalSelector.addGoal(3, new TemptGoal(this, 1.1D, Ingredient.of(TestMod.INSTANCE.REGISTRY.getItem(TypedRegKey.item("test_item", TestItem.class)).get()), false));
         this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.1D));
         this.goalSelector.addGoal(5, this.eatGrassGoal);
         this.goalSelector.addGoal(6, new WaterAvoidingRandomWalkingGoal(this, 1.0D));

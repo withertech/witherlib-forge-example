@@ -18,14 +18,18 @@
 
 package com.withertech.testmod;
 
+import com.withertech.testmod.blocks.TestBlock;
+import com.withertech.testmod.blocks.TestTileBlock;
+import com.withertech.testmod.client.entity.renderer.TestEntityRenderer;
+import com.withertech.testmod.containers.TestContainer;
+import com.withertech.testmod.entities.TestEntity;
+import com.withertech.testmod.fluids.TestFluid;
+import com.withertech.testmod.gui.TestTileGui;
+import com.withertech.testmod.items.TestItem;
+import com.withertech.testmod.tiles.TestTileEntity;
 import com.withertech.witherlib.data.BuilderDataGenerator;
 import com.withertech.witherlib.data.BuilderRecipeProvider;
 import com.withertech.witherlib.registration.*;
-import com.withertech.testmod.client.entity.renderer.TestEntityRenderer;
-import com.withertech.testmod.blocks.TestBlock;
-import com.withertech.testmod.entities.TestEntity;
-import com.withertech.testmod.fluids.TestFluid;
-import com.withertech.testmod.items.TestItem;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -37,12 +41,16 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.*;
 import net.minecraft.loot.*;
 import net.minecraft.loot.functions.EnchantRandomly;
 import net.minecraft.loot.functions.SetCount;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -70,44 +78,69 @@ public class TestMod extends BuilderMod
     @Override
     protected BuilderForgeRegistry<Block> registerBlocks()
     {
-        return BuilderForgeRegistry.Builder.create(MOD, ForgeRegistries.BLOCKS)
-                .add("test_block", () -> new TestBlock(AbstractBlock.Properties.of(Material.STONE)))
-                .add("test_fluid", () -> new FlowingFluidBlock(() -> (TestFluid) getFluids().get("test_fluid").get(), AbstractBlock.Properties.of(Material.WATER).noCollission().strength(100.0F).noDrops()))
-                .build();    }
+        return BuilderForgeRegistry.builder(MOD, ForgeRegistries.BLOCKS)
+                .add(TypedRegKey.block("test_block", TestBlock.class), () -> new TestBlock(AbstractBlock.Properties.of(Material.STONE)))
+                .add(TypedRegKey.block("test_fluid", FlowingFluidBlock.class), () -> new FlowingFluidBlock(() -> getFluids().get(TypedRegKey.fluid("test_fluid", TestFluid.Source.class)).get(), AbstractBlock.Properties.of(Material.WATER).strength(100.0F).noDrops()))
+                .add(TypedRegKey.tileBlock("test_tile_block", TestTileBlock.class), () -> new TestTileBlock(true, AbstractBlock.Properties.of(Material.STONE)))
+                .build();
+    }
 
     @Override
     protected BuilderForgeRegistry<Item> registerItems()
     {
-        return BuilderForgeRegistry.Builder.create(MOD, ForgeRegistries.ITEMS)
-                .add("test_item", () -> new TestItem(new Item.Properties().tab(getTabs().getTab(MODID))))
-                .add("test_block", () -> new BlockItem(getBlocks().get("test_block").get(), new Item.Properties().tab(getTabs().getTab(MODID))))
-                .add("test_fluid_bucket", () -> new BucketItem(() -> getFluids().get("test_fluid").get(), new Item.Properties().tab(ItemGroup.TAB_MISC)))
+        return BuilderForgeRegistry.builder(MOD, ForgeRegistries.ITEMS)
+                .add(TypedRegKey.item("test_item", TestItem.class), () -> new TestItem(new Item.Properties().tab(getTabs().getTab(MODID))))
+                .add(TypedRegKey.item("test_block", BlockItem.class), () -> new BlockItem(getBlocks().get(TypedRegKey.block("test_block", TestBlock.class)).get(), new Item.Properties().tab(getTabs().getTab(MODID))))
+                .add(TypedRegKey.item("test_fluid_bucket", BucketItem.class), () -> new BucketItem(() -> getFluids().get(TypedRegKey.fluid("test_fluid", TestFluid.Source.class)).get(), new Item.Properties().tab(getTabs().getTab(MODID))))
+                .add(TypedRegKey.item("test_tile_block", BlockItem.class), () -> new BlockItem(getBlocks().get(TypedRegKey.block("test_tile_block", TestTileBlock.class)).get(), new Item.Properties().tab(getTabs().getTab(MODID))))
                 .build();
     }
 
     @Override
     protected BuilderForgeRegistry<Fluid> registerFluids()
     {
-        return BuilderForgeRegistry.Builder.create(MOD, ForgeRegistries.FLUIDS)
-                .add("test_fluid", TestFluid.Source::new)
-                .add("test_fluid_flowing", TestFluid.Flowing::new)
+        return BuilderForgeRegistry.builder(MOD, ForgeRegistries.FLUIDS)
+                .add(TypedRegKey.fluid("test_fluid", TestFluid.Source.class), TestFluid.Source::new)
+                .add(TypedRegKey.fluid("test_fluid_flowing", TestFluid.Flowing.class), TestFluid.Flowing::new)
                 .build();
     }
 
     @Override
     protected BuilderForgeRegistry<EntityType<?>> registerEntities()
     {
-        return BuilderForgeRegistry.Builder.create(MOD, ForgeRegistries.ENTITIES)
-                .add("test_entity", () -> EntityType.Builder.of(TestEntity::new, EntityClassification.CREATURE)
-                        .sized(0.9f, 1.3f)
-                        .build(MOD.modLocation("test_entity").toString()))
+        return BuilderForgeRegistry.builder(MOD, ForgeRegistries.ENTITIES)
+                .add(TypedRegKey.entity("test_entity", TestEntity.class), () -> EntityType.Builder.of(TestEntity::new, EntityClassification.CREATURE).sized(0.9f, 1.3f).build(MOD.modLocation("test_entity").toString()))
+                .build();
+    }
+
+    @Override
+    protected BuilderForgeRegistry<TileEntityType<?>> registerTiles()
+    {
+        return BuilderForgeRegistry.builder(MOD, ForgeRegistries.TILE_ENTITIES)
+                .add(TypedRegKey.tile("test_tile", TestTileEntity.class), () -> TileEntityType.Builder.of(TestTileEntity::new, getBlocks().get(TypedRegKey.block("test_tile_block", TestTileBlock.class)).get()).build(null))
+                .build();
+    }
+
+    @Override
+    protected BuilderForgeRegistry<ContainerType<?>> registerContainers()
+    {
+        return BuilderForgeRegistry.builder(MOD, ForgeRegistries.CONTAINERS)
+                .add(TypedRegKey.container("test_container", TestContainer.class), () -> IForgeContainerType.create((windowId, inv, data) -> new TestContainer(windowId, inv.player, data.readBlockPos())))
+                .build();
+    }
+
+    @Override
+    protected BuilderGuiTileRegistry registerGuis()
+    {
+        return BuilderGuiTileRegistry.builder()
+                .add(TypedRegKey.gui("test_gui", TestTileGui.class), new TestTileGui())
                 .build();
     }
 
     @Override
     protected BuilderEntityAttributeRegistry registerEntityAttributes()
     {
-        return BuilderEntityAttributeRegistry.Builder.create(MOD)
+        return BuilderEntityAttributeRegistry.builder()
                 .addEntity("test_entity", () -> MobEntity.createMobAttributes().add(Attributes.MAX_HEALTH, 8.0D).add(Attributes.MOVEMENT_SPEED, 0.23F))
                 .build();
     }
@@ -115,23 +148,53 @@ public class TestMod extends BuilderMod
     @Override
     protected BuilderEntityRendererRegistry registerEntityRenderers()
     {
-        return BuilderEntityRendererRegistry.Builder.create(MOD)
+        return BuilderEntityRendererRegistry.builder()
                 .addEntity("test_entity", TestEntityRenderer::new)
+                .build();
+    }
+
+    @Override
+    protected BuilderTagRegistry registerTags()
+    {
+        return BuilderTagRegistry.builder(MOD)
+                .addBlock("test_block")
+                .addItem("test_item")
+                .addFluid("test_fluid")
+                .build();
+    }
+
+    @Override
+    protected BuilderTabRegistry registerTabs()
+    {
+        return BuilderTabRegistry.builder()
+                .addGroup(MODID, new ItemGroup(MODID)
+                {
+
+                    @Nonnull
+                    @Override
+                    public ItemStack makeIcon()
+                    {
+                        return new ItemStack(getItems().get(TypedRegKey.item("test_item", TestItem.class)).get());
+                    }
+                })
                 .build();
     }
 
     @Override
     protected BuilderDataGenerator registerDataGenerators()
     {
-        return BuilderDataGenerator.Builder.create(MOD)
+        return BuilderDataGenerator.builder(MOD)
 
                 .addBlockState(builderBlockStateGenerator ->
                 {
                     builderBlockStateGenerator.simpleBlock(
-                            getBlocks().get("test_block").get()
+                            getBlocks().get(TypedRegKey.block("test_block", TestBlock.class)).get()
                     );
                     builderBlockStateGenerator.simpleBlock(
-                            getBlocks().get("test_fluid").get(),
+                            getBlocks().get(TypedRegKey.block("test_tile_block", TestTileBlock.class)).get()
+                    );
+                    builderBlockStateGenerator.simpleBlock(
+                            getBlocks().get(TypedRegKey.block("test_fluid", FlowingFluidBlock.class)).get(),
                             builderBlockStateGenerator.models()
                                     .getBuilder("test_fluid")
                                     .texture("particle",
@@ -141,29 +204,35 @@ public class TestMod extends BuilderMod
                 })
                 .addItemModel(builderItemModelProvider ->
                 {
-                    builderItemModelProvider.blockBuilder(getBlocks().get("test_block").get());
-                    builderItemModelProvider.builder(getItems().get("test_item").get(), builderItemModelProvider.getGenerated());
-                    builderItemModelProvider.builder(getItems().get("test_fluid_bucket").get(), builderItemModelProvider.getGenerated());
+                    builderItemModelProvider.blockBuilder(getBlocks().get(TypedRegKey.block("test_block", TestBlock.class)).get());
+                    builderItemModelProvider.blockBuilder(getBlocks().get(TypedRegKey.block("test_tile_block", TestTileBlock.class)).get());
+                    builderItemModelProvider.builder(getItems().get(TypedRegKey.item("test_item", TestItem.class)).get(), builderItemModelProvider.getGenerated());
+                    builderItemModelProvider.builder(getItems().get(TypedRegKey.item("test_fluid_bucket", BucketItem.class)).get(), builderItemModelProvider.getGenerated());
                 })
                 .addBlockTag(builderBlockTagsProvider ->
                 {
                     builderBlockTagsProvider.tag(getTags().getBlock("test_block"))
-                            .add(getBlocks().get("test_block").get());
+                            .add(getBlocks().get(TypedRegKey.block("test_block", TestBlock.class)).get());
                 })
                 .addItemTag(builderItemTagsProvider ->
                 {
                     builderItemTagsProvider.tag(getTags().getItem("test_item"))
-                            .add(getItems().get("test_item").get());
+                            .add(getItems().get(TypedRegKey.item("test_item", TestItem.class)).get());
                 })
                 .addFluidTag(builderFluidTagsProvider ->
                 {
+                    builderFluidTagsProvider.tag(FluidTags.WATER)
+                            .add(getFluids().get(TypedRegKey.fluid("test_fluid", TestFluid.Source.class)).get())
+                            .add(getFluids().get(TypedRegKey.fluid("test_fluid_flowing", TestFluid.Flowing.class)).get());
                     builderFluidTagsProvider.tag(getTags().getFluid("test_fluid"))
-                            .add(getFluids().get("test_fluid").get())
-                            .add(getFluids().get("test_fluid_flowing").get());
+                            .add(getFluids().get(TypedRegKey.fluid("test_fluid", TestFluid.Source.class)).get())
+                            .add(getFluids().get(TypedRegKey.fluid("test_fluid_flowing", TestFluid.Flowing.class)).get());
+
                 })
                 .addBlockLootTable(builderBlockLootTableProvider ->
                 {
-                    builderBlockLootTableProvider.dropSelf(getBlocks().get("test_block").get());
+                    builderBlockLootTableProvider.dropSelf(getBlocks().get(TypedRegKey.block("test_block", TestBlock.class)).get());
+                    builderBlockLootTableProvider.dropSelf(getBlocks().get(TypedRegKey.block("test_tile_block", TestTileBlock.class)).get());
                 }, new ArrayList<>(getBlocks().getREGISTRY().getEntries()))
                 .addChestLootTable(consumer ->
                 {
@@ -171,7 +240,7 @@ public class TestMod extends BuilderMod
                 })
                 .addEntityLootTable(builderEntityLootTableProvider ->
                 {
-                    builderEntityLootTableProvider.add(getEntities().get("test_entity").get(), LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantRange.exactly(1)).add(ItemLootEntry.lootTableItem(getItems().get("test_item").get()).setWeight(100))));
+                    builderEntityLootTableProvider.add(getEntities().get(TypedRegKey.entity("test_entity", TestEntity.class)).get(), LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantRange.exactly(1)).add(ItemLootEntry.lootTableItem(getItems().get(TypedRegKey.item("test_item", TestItem.class)).get()).setWeight(100))));
                 }, new ArrayList<>(getEntities().getREGISTRY().getEntries()))
                 .addRecipe(iFinishedRecipeConsumer ->
                 {
@@ -182,39 +251,13 @@ public class TestMod extends BuilderMod
                 })
                 .addLang(builderLangProvider ->
                 {
-                    builderLangProvider.add(getItems().get("test_item").get(), "Test Item");
-                    builderLangProvider.add(getItems().get("test_fluid_bucket").get(), "Test Fluid Bucket");
-                    builderLangProvider.add(getBlocks().get("test_block").get(), "Test Block");
-                    builderLangProvider.add(getEntities().get("test_entity").get(), "Test Entity");
-                    builderLangProvider.add(getFluids().get("test_fluid").get().getAttributes().getTranslationKey(), "Test Fluid");
+                    builderLangProvider.add(getItems().get(TypedRegKey.item("test_item", TestItem.class)).get(), "Test Item");
+                    builderLangProvider.add(getItems().get(TypedRegKey.item("test_fluid_bucket", BucketItem.class)).get(), "Test Fluid Bucket");
+                    builderLangProvider.add(getBlocks().get(TypedRegKey.block("test_block", TestBlock.class)).get(), "Test Block");
+                    builderLangProvider.add(getBlocks().get(TypedRegKey.block("test_tile_block", TestTileBlock.class)).get(), "Test Tile Block");
+                    builderLangProvider.add(getEntities().get(TypedRegKey.entity("test_entity", TestEntity.class)).get(), "Test Entity");
+                    builderLangProvider.add(getFluids().get(TypedRegKey.fluid("test_fluid", TestFluid.Source.class)).get().getAttributes().getTranslationKey(), "Test Fluid");
                     builderLangProvider.add(((TranslationTextComponent) getTabs().getTab(MODID).getDisplayName()).getKey(), "Test Tab");
-                })
-                .build();
-    }
-
-    @Override
-    protected BuilderTagRegistry registerTags()
-    {
-        return BuilderTagRegistry.Builder.create(MOD)
-                .addBlock("test_block")
-                .addItem("test_item")
-                .addFluid("test_fluid")
-                .build();
-    }
-
-    @Override
-    protected BuilderTabRegistry registerTabs()
-    {
-        return BuilderTabRegistry.Builder.create(MOD)
-                .addGroup(MODID, new ItemGroup(MODID)
-                {
-
-                    @Nonnull
-                    @Override
-                    public ItemStack makeIcon()
-                    {
-                        return new ItemStack(REGISTRY.getItem("test_item").get());
-                    }
                 })
                 .build();
     }

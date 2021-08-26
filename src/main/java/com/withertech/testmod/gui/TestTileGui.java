@@ -24,7 +24,6 @@ import com.withertech.testmod.client.tile.renderer.TestTileEntityRenderer;
 import com.withertech.testmod.containers.TestContainer;
 import com.withertech.testmod.screens.TestScreen;
 import com.withertech.testmod.tiles.TestTileEntity;
-import com.withertech.witherlib.WitherLib;
 import com.withertech.witherlib.gui.TileGui;
 import com.withertech.witherlib.registration.TypedRegKey;
 import net.minecraft.client.gui.ScreenManager;
@@ -41,7 +40,7 @@ public class TestTileGui extends TileGui<TestTileBlock, TestTileEntity, TestCont
     @Override
     protected RegistryObject<TestTileBlock> registerBlock()
     {
-        return TestMod.INSTANCE.REGISTRY.getBlock(TypedRegKey.tileBlock("test_tile_block", TestTileBlock.class));
+        return TestMod.INSTANCE.REGISTRY.getBlock(TypedRegKey.block("test_tile_block", TestTileBlock.class));
     }
 
     @Override

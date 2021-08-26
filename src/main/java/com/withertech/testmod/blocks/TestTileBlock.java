@@ -21,7 +21,6 @@ package com.withertech.testmod.blocks;
 import com.withertech.testmod.TestMod;
 import com.withertech.testmod.containers.TestContainer;
 import com.withertech.testmod.tiles.TestTileEntity;
-import com.withertech.witherlib.WitherLib;
 import com.withertech.witherlib.block.BaseTileBlock;
 import com.withertech.witherlib.registration.TypedRegKey;
 import com.withertech.witherlib.util.TextComponents;
@@ -37,7 +36,7 @@ import net.minecraft.world.IBlockReader;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class TestTileBlock extends BaseTileBlock
+public class TestTileBlock extends BaseTileBlock<TestTileEntity>
 {
     public TestTileBlock(boolean saveTileData, Properties properties)
     {
@@ -51,7 +50,7 @@ public class TestTileBlock extends BaseTileBlock
     }
 
     @Override
-    protected ITextComponent getDisplayName()
+    protected ITextComponent getDisplayName(TestTileEntity tile)
     {
         return TextComponents.block(this).get();
     }
@@ -61,19 +60,6 @@ public class TestTileBlock extends BaseTileBlock
     public BlockRenderType getRenderShape(@Nonnull BlockState state)
     {
         return BlockRenderType.INVISIBLE;
-    }
-
-    @Override
-    public boolean hasTileEntity(BlockState state)
-    {
-        return true;
-    }
-
-    @Nullable
-    @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world)
-    {
-        return newBlockEntity(world);
     }
 
     @Nullable

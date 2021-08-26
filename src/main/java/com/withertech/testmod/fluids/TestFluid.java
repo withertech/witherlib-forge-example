@@ -19,7 +19,6 @@
 package com.withertech.testmod.fluids;
 
 import com.withertech.testmod.TestMod;
-import com.withertech.witherlib.WitherLib;
 import com.withertech.witherlib.registration.TypedRegKey;
 import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.fluid.FluidState;

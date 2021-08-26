@@ -111,6 +111,7 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 repositories {
     maven { url 'https://jitpack.io' }
+    maven { url "https://www.cursemaven.com" }
 }
 dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
@@ -118,7 +119,9 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.2'
 
-    compile fg.deobf('com.withertech:witherlib-forge:b4079c8cc0')
+    compile fg.deobf('com.withertech:witherlib-forge:f5532c4f35')
+
+//    runtime fg.deobf('curse.maven:mekanism-268560:3206392')
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"

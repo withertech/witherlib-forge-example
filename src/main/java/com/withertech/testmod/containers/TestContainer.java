@@ -20,7 +20,6 @@ package com.withertech.testmod.containers;
 
 import com.withertech.testmod.TestMod;
 import com.withertech.testmod.tiles.TestTileEntity;
-import com.withertech.witherlib.WitherLib;
 import com.withertech.witherlib.gui.TileEntityBaseContainer;
 import com.withertech.witherlib.registration.TypedRegKey;
 import net.minecraft.entity.player.PlayerEntity;
@@ -31,7 +30,7 @@ import net.minecraftforge.items.SlotItemHandler;
 
 import javax.annotation.Nonnull;
 
-public class TestContainer extends TileEntityBaseContainer<TestTileEntity>
+public class TestContainer extends TileEntityBaseContainer<TestContainer, TestTileEntity>
 {
     private static final int SIZE = 54;
 
@@ -44,7 +43,7 @@ public class TestContainer extends TileEntityBaseContainer<TestTileEntity>
     @Override
     protected void addSlots(PlayerEntity player, @Nonnull TestTileEntity object)
     {
-        object.itemsLazy.ifPresent(itemStackHandler ->
+        object.items.ifPresent(itemStackHandler ->
         {
             for (int i = 0; i < 6; i++)
             {

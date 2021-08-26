@@ -20,14 +20,10 @@ package com.withertech.testmod.entities;
 
 import com.withertech.testmod.TestMod;
 import com.withertech.testmod.items.TestItem;
-import com.withertech.witherlib.WitherLib;
 import com.withertech.witherlib.registration.TypedRegKey;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;

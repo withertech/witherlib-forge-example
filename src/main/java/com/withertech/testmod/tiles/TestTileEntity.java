@@ -19,7 +19,6 @@
 package com.withertech.testmod.tiles;
 
 import com.withertech.testmod.TestMod;
-import com.withertech.witherlib.WitherLib;
 import com.withertech.witherlib.registration.TypedRegKey;
 import com.withertech.witherlib.tile.BaseTileEntity;
 import com.withertech.witherlib.util.SyncVariable;
@@ -34,11 +33,12 @@ import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 public class TestTileEntity extends BaseTileEntity<TestTileEntity>
 {
     @SyncVariable(name = "Items")
-    public final LazyOptional<ItemStackHandler> itemsLazy = LazyOptional.of(this::createHandler);
+    public final LazyOptional<ItemStackHandler> items = LazyOptional.of(this::createHandler);
 
     public TestTileEntity()
     {
@@ -46,9 +46,9 @@ public class TestTileEntity extends BaseTileEntity<TestTileEntity>
     }
 
     @OnlyIn(Dist.CLIENT)
-    public boolean shouldRenderFace(Direction p_184313_1_)
+    public boolean shouldRenderFace(Direction face)
     {
-        return Block.shouldRenderFace(this.getBlockState(), this.level, this.getBlockPos(), p_184313_1_);
+        return Block.shouldRenderFace(this.getBlockState(), Objects.requireNonNull(this.level), this.getBlockPos(), face);
     }
 
     @Nonnull
@@ -71,7 +71,7 @@ public class TestTileEntity extends BaseTileEntity<TestTileEntity>
     {
         if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
         {
-            return itemsLazy.cast();
+            return items.cast();
         }
         return super.getCapability(cap, side);
     }
@@ -80,6 +80,6 @@ public class TestTileEntity extends BaseTileEntity<TestTileEntity>
     protected void invalidateCaps()
     {
         super.invalidateCaps();
-        itemsLazy.invalidate();
+        items.invalidate();
     }
 }

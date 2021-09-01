@@ -30,7 +30,7 @@ public class TestScreen extends TileEntityBaseContainerScreen<TestTileEntity, Te
 {
     public TestScreen(TestContainer screenContainer, PlayerInventory playerInventory, ITextComponent title)
     {
-        super(screenContainer, title);
+        super(screenContainer, playerInventory, title);
     }
 
     @Override

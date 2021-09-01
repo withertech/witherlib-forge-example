@@ -13,7 +13,7 @@ public class TestEnergyScreen extends TileEntityBaseContainerScreen<TestEnergyTi
 {
     public TestEnergyScreen(TestEnergyContainer screenContainer, PlayerInventory playerInventory, ITextComponent title)
     {
-        super(screenContainer, title);
+        super(screenContainer, playerInventory, title);
     }
 
     @Override

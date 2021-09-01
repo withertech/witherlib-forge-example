@@ -20,16 +20,21 @@ package com.withertech.testmod;
 
 import com.withertech.testmod.blocks.TestBlock;
 import com.withertech.testmod.blocks.TestEnergyBlock;
+import com.withertech.testmod.blocks.TestProgressBlock;
 import com.withertech.testmod.blocks.TestTileBlock;
 import com.withertech.testmod.client.entity.renderer.TestEntityRenderer;
 import com.withertech.testmod.containers.TestContainer;
 import com.withertech.testmod.containers.TestEnergyContainer;
+import com.withertech.testmod.containers.TestProgressContainer;
 import com.withertech.testmod.entities.TestEntity;
 import com.withertech.testmod.fluids.TestFluid;
 import com.withertech.testmod.gui.TestEnergyGui;
+import com.withertech.testmod.gui.TestProgressGui;
 import com.withertech.testmod.gui.TestTileGui;
 import com.withertech.testmod.items.TestItem;
+import com.withertech.testmod.network.TestProgressPacket;
 import com.withertech.testmod.tiles.TestEnergyTile;
+import com.withertech.testmod.tiles.TestProgressTile;
 import com.withertech.testmod.tiles.TestTileEntity;
 import com.withertech.witherlib.data.BuilderDataGenerator;
 import com.withertech.witherlib.data.BuilderRecipeProvider;
@@ -87,6 +92,7 @@ public class TestMod extends BuilderMod
                 .add(TypedRegKey.block("test_fluid", FlowingFluidBlock.class), () -> new FlowingFluidBlock(() -> getFluids().get(TypedRegKey.fluid("test_fluid", TestFluid.Source.class)).get(), AbstractBlock.Properties.of(Material.WATER).strength(100.0F).noDrops()))
                 .add(TypedRegKey.block("test_tile_block", TestTileBlock.class), () -> new TestTileBlock(true, AbstractBlock.Properties.of(Material.STONE)))
                 .add(TypedRegKey.block("test_energy_block", TestEnergyBlock.class), () -> new TestEnergyBlock(true, AbstractBlock.Properties.of(Material.STONE)))
+                .add(TypedRegKey.block("test_progress_block", TestProgressBlock.class), TestProgressBlock::new)
                 .build();
     }
 
@@ -99,6 +105,7 @@ public class TestMod extends BuilderMod
                 .add(TypedRegKey.item("test_fluid_bucket", BucketItem.class), () -> new BucketItem(() -> getFluids().get(TypedRegKey.fluid("test_fluid", TestFluid.Source.class)).get(), new Item.Properties().tab(getTabs().getTab(MODID))))
                 .add(TypedRegKey.item("test_tile_block", BlockItem.class), () -> new BlockItem(getBlocks().get(TypedRegKey.block("test_tile_block", TestTileBlock.class)).get(), new Item.Properties().tab(getTabs().getTab(MODID))))
                 .add(TypedRegKey.item("test_energy_block", BlockItem.class), () -> new BlockItem(getBlocks().get(TypedRegKey.block("test_energy_block", TestEnergyBlock.class)).get(), new Item.Properties().tab(getTabs().getTab(MODID))))
+                .add(TypedRegKey.item("test_progress_block", BlockItem.class), () -> new BlockItem(getBlocks().get(TypedRegKey.block("test_progress_block", TestProgressBlock.class)).get(), new Item.Properties().tab(getTabs().getTab(MODID))))
                 .build();
     }
 
@@ -125,6 +132,7 @@ public class TestMod extends BuilderMod
         return BuilderForgeRegistry.builder(MOD, ForgeRegistries.TILE_ENTITIES)
                 .add(TypedRegKey.tile("test_tile", TestTileEntity.class), () -> TileEntityType.Builder.of(TestTileEntity::new, getBlocks().get(TypedRegKey.block("test_tile_block", TestTileBlock.class)).get()).build(null))
                 .add(TypedRegKey.tile("test_energy_tile", TestEnergyTile.class), () -> TileEntityType.Builder.of(TestEnergyTile::new, getBlocks().get(TypedRegKey.block("test_energy_block", TestEnergyBlock.class)).get()).build(null))
+                .add(TypedRegKey.tile("test_progress_tile", TestProgressTile.class), () -> TileEntityType.Builder.of(TestProgressTile::new, getBlocks().get(TypedRegKey.block("test_progress_block", TestProgressBlock.class)).get()).build(null))
                 .build();
     }
 
@@ -134,15 +142,17 @@ public class TestMod extends BuilderMod
         return BuilderForgeRegistry.builder(MOD, ForgeRegistries.CONTAINERS)
                 .add(TypedRegKey.container("test_container", TestContainer.class), () -> IForgeContainerType.create((windowId, inv, data) -> new TestContainer(windowId, inv.player, data.readBlockPos())))
                 .add(TypedRegKey.container("test_energy_container", TestEnergyContainer.class), () -> IForgeContainerType.create((windowId, inv, data) -> new TestEnergyContainer(windowId, inv.player, data.readBlockPos())))
+                .add(TypedRegKey.container("test_progress_container", TestProgressContainer.class), () -> IForgeContainerType.create((windowId, inv, data) -> new TestProgressContainer(windowId, inv.player, data.readBlockPos())))
                 .build();
     }
 
     @Override
-    protected BuilderGuiTileRegistry registerGuis()
+    protected BuilderGuiRegistry registerGuis()
     {
-        return BuilderGuiTileRegistry.builder()
+        return BuilderGuiRegistry.builder()
                 .add(TypedRegKey.gui("test_gui", TestTileGui.class), new TestTileGui())
                 .add(TypedRegKey.gui("test_energy_gui", TestEnergyGui.class), new TestEnergyGui())
+                .add(TypedRegKey.gui("test_progress_gui", TestProgressGui.class), new TestProgressGui())
                 .build();
     }
 
@@ -194,23 +204,26 @@ public class TestMod extends BuilderMod
     {
         return BuilderDataGenerator.builder(MOD)
 
-                .addBlockState(builderBlockStateGenerator ->
+                .addBlockState(builderBlockStateProvider ->
                 {
-                    builderBlockStateGenerator.simpleBlock(
+                    builderBlockStateProvider.simpleBlock(
                             getBlocks().get(TypedRegKey.block("test_block", TestBlock.class)).get()
                     );
-                    builderBlockStateGenerator.simpleBlock(
+                    builderBlockStateProvider.simpleBlock(
                             getBlocks().get(TypedRegKey.block("test_tile_block", TestTileBlock.class)).get()
                     );
-                    builderBlockStateGenerator.simpleBlock(
+                    builderBlockStateProvider.simpleBlock(
                             getBlocks().get(TypedRegKey.block("test_energy_block", TestEnergyBlock.class)).get()
                     );
-                    builderBlockStateGenerator.simpleBlock(
+                    builderBlockStateProvider.simpleBlock(
+                            getBlocks().get(TypedRegKey.block("test_progress_block", TestProgressBlock.class)).get()
+                    );
+                    builderBlockStateProvider.simpleBlock(
                             getBlocks().get(TypedRegKey.block("test_fluid", FlowingFluidBlock.class)).get(),
-                            builderBlockStateGenerator.models()
+                            builderBlockStateProvider.models()
                                     .getBuilder("test_fluid")
                                     .texture("particle",
-                                            builderBlockStateGenerator.modLoc("block/test_fluid_still")
+                                            builderBlockStateProvider.modLoc("block/test_fluid_still")
                                     )
                     );
                 })
@@ -219,6 +232,7 @@ public class TestMod extends BuilderMod
                     builderItemModelProvider.blockBuilder(getBlocks().get(TypedRegKey.block("test_block", TestBlock.class)).get());
                     builderItemModelProvider.blockBuilder(getBlocks().get(TypedRegKey.block("test_tile_block", TestTileBlock.class)).get());
                     builderItemModelProvider.blockBuilder(getBlocks().get(TypedRegKey.block("test_energy_block", TestEnergyBlock.class)).get());
+                    builderItemModelProvider.blockBuilder(getBlocks().get(TypedRegKey.block("test_progress_block", TestProgressBlock.class)).get());
                     builderItemModelProvider.builder(getItems().get(TypedRegKey.item("test_item", TestItem.class)).get(), builderItemModelProvider.getGenerated());
                     builderItemModelProvider.builder(getItems().get(TypedRegKey.item("test_fluid_bucket", BucketItem.class)).get(), builderItemModelProvider.getGenerated());
                 })
@@ -247,6 +261,7 @@ public class TestMod extends BuilderMod
                     builderBlockLootTableProvider.dropSelf(getBlocks().get(TypedRegKey.block("test_block", TestBlock.class)).get());
                     builderBlockLootTableProvider.dropSelf(getBlocks().get(TypedRegKey.block("test_tile_block", TestTileBlock.class)).get());
                     builderBlockLootTableProvider.dropSelf(getBlocks().get(TypedRegKey.block("test_energy_block", TestEnergyBlock.class)).get());
+                    builderBlockLootTableProvider.dropSelf(getBlocks().get(TypedRegKey.block("test_progress_block", TestProgressBlock.class)).get());
                 }, new ArrayList<>(getBlocks().getREGISTRY().getEntries()))
                 .addChestLootTable(consumer ->
                 {
@@ -270,10 +285,21 @@ public class TestMod extends BuilderMod
                     builderLangProvider.add(getBlocks().get(TypedRegKey.block("test_block", TestBlock.class)).get(), "Test Block");
                     builderLangProvider.add(getBlocks().get(TypedRegKey.block("test_tile_block", TestTileBlock.class)).get(), "Test Tile Block");
                     builderLangProvider.add(getBlocks().get(TypedRegKey.block("test_energy_block", TestEnergyBlock.class)).get(), "Test Energy Block");
+                    builderLangProvider.add(getBlocks().get(TypedRegKey.block("test_progress_block", TestProgressBlock.class)).get(), "Test Progress Block");
                     builderLangProvider.add(getEntities().get(TypedRegKey.entity("test_entity", TestEntity.class)).get(), "Test Entity");
                     builderLangProvider.add(getFluids().get(TypedRegKey.fluid("test_fluid", TestFluid.Source.class)).get().getAttributes().getTranslationKey(), "Test Fluid");
                     builderLangProvider.add(((TranslationTextComponent) getTabs().getTab(MODID).getDisplayName()).getKey(), "Test Tab");
                 })
+                .build();
+    }
+
+    @Override
+    protected BuilderNetworkRegistry registerNets()
+    {
+        return BuilderNetworkRegistry.builder(MOD)
+                .add("main", BuilderNetworkRegistry.channel()
+                        .add(TestProgressPacket.class, TestProgressPacket::new, true)
+                        .build())
                 .build();
     }
 }

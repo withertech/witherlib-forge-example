@@ -8,16 +8,11 @@ import com.withertech.testmod.tiles.TestEnergyTile;
 import com.withertech.witherlib.gui.TileGui;
 import com.withertech.witherlib.registration.TypedRegKey;
 import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.fml.RegistryObject;
 
-import javax.annotation.Nullable;
-import java.util.function.Function;
-
-public class TestEnergyGui extends TileGui<TestEnergyBlock, TestEnergyTile, TestEnergyContainer, TestEnergyScreen, TileEntityRenderer<TestEnergyTile>>
+public class TestEnergyGui extends TileGui<TestEnergyBlock, TestEnergyTile, TestEnergyContainer, TestEnergyScreen>
 {
     @Override
     protected RegistryObject<TestEnergyBlock> registerBlock()
@@ -41,12 +36,5 @@ public class TestEnergyGui extends TileGui<TestEnergyBlock, TestEnergyTile, Test
     protected ScreenManager.IScreenFactory<TestEnergyContainer, TestEnergyScreen> registerScreen()
     {
         return TestEnergyScreen::new;
-    }
-
-    @Nullable
-    @Override
-    protected Function<? super TileEntityRendererDispatcher, TileEntityRenderer<TestEnergyTile>> registerTer()
-    {
-        return null;
     }
 }

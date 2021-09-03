@@ -23,6 +23,10 @@ import com.withertech.testmod.blocks.TestEnergyBlock;
 import com.withertech.testmod.blocks.TestProgressBlock;
 import com.withertech.testmod.blocks.TestTileBlock;
 import com.withertech.testmod.client.entity.renderer.TestEntityRenderer;
+import com.withertech.testmod.client.tile.renderer.TestTileEntityRenderer;
+import com.withertech.testmod.configs.ClientConfig;
+import com.withertech.testmod.configs.CommonConfig;
+import com.withertech.testmod.configs.ServerConfig;
 import com.withertech.testmod.containers.TestContainer;
 import com.withertech.testmod.containers.TestEnergyContainer;
 import com.withertech.testmod.containers.TestProgressContainer;
@@ -33,6 +37,7 @@ import com.withertech.testmod.gui.TestProgressGui;
 import com.withertech.testmod.gui.TestTileGui;
 import com.withertech.testmod.items.TestItem;
 import com.withertech.testmod.network.TestProgressPacket;
+import com.withertech.testmod.registration.TestRegistryEntry;
 import com.withertech.testmod.tiles.TestEnergyTile;
 import com.withertech.testmod.tiles.TestProgressTile;
 import com.withertech.testmod.tiles.TestTileEntity;
@@ -76,12 +81,29 @@ public class TestMod extends BuilderMod
     public static final Logger LOGGER = LogManager.getLogger();
     public static TestMod INSTANCE;
 
-
     public TestMod()
     {
         super(new ModData(MODID, FMLJavaModLoadingContext.get().getModEventBus()));
         INSTANCE = this;
         MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    @Override
+    protected BuilderCustomRegistryRegistry registerCustomRegistries()
+    {
+        return BuilderCustomRegistryRegistry.builder(MOD)
+                .add(TypedRegKey.registry("test", TestRegistryEntry.class), BuilderCustomRegistryRegistry.registry(TestRegistryEntry.class))
+                .build();
+    }
+
+    @Override
+    protected BuilderCustomRegistryEntryRegistry registerCustomRegistryEntries()
+    {
+        return BuilderCustomRegistryEntryRegistry.builder()
+                .add(TypedRegKey.registry("test", TestRegistryEntry.class), BuilderForgeRegistry.builder(MOD, TestRegistryEntry.class)
+                        .add(TypedRegKey.custom("test", TestRegistryEntry.class), () -> new TestRegistryEntry(true))
+                        .build())
+                .build();
     }
 
     @Override
@@ -160,7 +182,7 @@ public class TestMod extends BuilderMod
     protected BuilderEntityAttributeRegistry registerEntityAttributes()
     {
         return BuilderEntityAttributeRegistry.builder()
-                .addEntity("test_entity", () -> MobEntity.createMobAttributes().add(Attributes.MAX_HEALTH, 8.0D).add(Attributes.MOVEMENT_SPEED, 0.23F))
+                .add("test_entity", () -> MobEntity.createMobAttributes().add(Attributes.MAX_HEALTH, 8.0D).add(Attributes.MOVEMENT_SPEED, 0.23F))
                 .build();
     }
 
@@ -168,7 +190,15 @@ public class TestMod extends BuilderMod
     protected BuilderEntityRendererRegistry registerEntityRenderers()
     {
         return BuilderEntityRendererRegistry.builder()
-                .addEntity("test_entity", TestEntityRenderer::new)
+                .add("test_entity", TestEntityRenderer::new)
+                .build();
+    }
+
+    @Override
+    protected BuilderTileEntityRendererRegistry registerTileRenderers()
+    {
+        return BuilderTileEntityRendererRegistry.builder()
+                .add("test_tile", TestTileEntityRenderer::new)
                 .build();
     }
 
@@ -186,7 +216,7 @@ public class TestMod extends BuilderMod
     protected BuilderTabRegistry registerTabs()
     {
         return BuilderTabRegistry.builder()
-                .addGroup(MODID, new ItemGroup(MODID)
+                .add(MODID, new ItemGroup(MODID)
                 {
 
                     @Nonnull
@@ -300,6 +330,16 @@ public class TestMod extends BuilderMod
                 .add("main", BuilderNetworkRegistry.channel()
                         .add(TestProgressPacket.class, TestProgressPacket::new, true)
                         .build())
+                .build();
+    }
+
+    @Override
+    protected BuilderConfigRegistry registerConfigs()
+    {
+        return BuilderConfigRegistry.builder(MOD)
+                .add(TypedRegKey.config("client", ClientConfig.class), ClientConfig::new)
+                .add(TypedRegKey.config("common", CommonConfig.class), CommonConfig::new)
+                .add(TypedRegKey.config("server", ServerConfig.class), ServerConfig::new)
                 .build();
     }
 }

@@ -20,22 +20,17 @@ package com.withertech.testmod.gui;
 
 import com.withertech.testmod.TestMod;
 import com.withertech.testmod.blocks.TestTileBlock;
-import com.withertech.testmod.client.tile.renderer.TestTileEntityRenderer;
 import com.withertech.testmod.containers.TestContainer;
 import com.withertech.testmod.screens.TestScreen;
 import com.withertech.testmod.tiles.TestTileEntity;
 import com.withertech.witherlib.gui.TileGui;
 import com.withertech.witherlib.registration.TypedRegKey;
 import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.fml.RegistryObject;
 
-import javax.annotation.Nullable;
-import java.util.function.Function;
-
-public class TestTileGui extends TileGui<TestTileBlock, TestTileEntity, TestContainer, TestScreen, TestTileEntityRenderer>
+public class TestTileGui extends TileGui<TestTileBlock, TestTileEntity, TestContainer, TestScreen>
 {
     @Override
     protected RegistryObject<TestTileBlock> registerBlock()
@@ -59,13 +54,6 @@ public class TestTileGui extends TileGui<TestTileBlock, TestTileEntity, TestCont
     protected ScreenManager.IScreenFactory<TestContainer, TestScreen> registerScreen()
     {
         return TestScreen::new;
-    }
-
-    @Override
-    @Nullable
-    protected Function<? super TileEntityRendererDispatcher, TestTileEntityRenderer> registerTer()
-    {
-        return TestTileEntityRenderer::new;
     }
 
 }

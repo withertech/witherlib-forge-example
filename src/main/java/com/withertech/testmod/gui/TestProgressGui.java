@@ -26,16 +26,11 @@ import com.withertech.testmod.tiles.TestProgressTile;
 import com.withertech.witherlib.gui.TileGui;
 import com.withertech.witherlib.registration.TypedRegKey;
 import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.fml.RegistryObject;
 
-import javax.annotation.Nullable;
-import java.util.function.Function;
-
-public class TestProgressGui extends TileGui<TestProgressBlock, TestProgressTile, TestProgressContainer, TestProgressScreen, TileEntityRenderer<TestProgressTile>>
+public class TestProgressGui extends TileGui<TestProgressBlock, TestProgressTile, TestProgressContainer, TestProgressScreen>
 {
     @Override
     protected RegistryObject<TestProgressBlock> registerBlock()
@@ -59,12 +54,5 @@ public class TestProgressGui extends TileGui<TestProgressBlock, TestProgressTile
     protected ScreenManager.IScreenFactory<TestProgressContainer, TestProgressScreen> registerScreen()
     {
         return TestProgressScreen::new;
-    }
-
-    @Nullable
-    @Override
-    protected Function<? super TileEntityRendererDispatcher, TileEntityRenderer<TestProgressTile>> registerTer()
-    {
-        return null;
     }
 }
